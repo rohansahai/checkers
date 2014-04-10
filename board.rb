@@ -7,7 +7,6 @@ class Board
   
   def initialize(options = {})
     @spaces = Array.new(8) { Array.new(8) }
-    @pieces = {:red => [], :black => []}
     populate_board unless options[:empty]
   end
   
@@ -50,6 +49,23 @@ class Board
     @spaces[pos.last][pos.first] = piece
   end
   
+  def dup_board
+    dup_board = Board.new(empty: true)
+    pieces.each do |piece|
+      new_piece = Piece.new(piece.position, dup_board, piece.color, piece.king)
+      dup_board.add_piece(new_piece, piece.position)
+    end
+    dup_board
+  end
+  
+  def add_piece(new_piece, pos)
+    self[pos] = new_piece
+  end
+  
+  def pieces
+    @spaces.flatten.compact
+  end
+  
   def render
     print "  "
     puts (0..7).to_a.join(" ")
@@ -74,17 +90,11 @@ end
 
 new_board = Board.new
 new_board[[0,2]].perform_moves("1,3")
-new_board[[3,5]].perform_moves("2,4")
-new_board[[4,6]].perform_moves("3,5")
-new_board[[3,5]].perform_moves("4,4")
-new_board[[5,7]].perform_moves("4,6")
-new_board[[1,3]].perform_moves("3,5 5,7 4,6")
-# new_board[[0,2]].perform_slide([1,3])
-# new_board[[3,5]].perform_slide([2,4])
-# new_board[[1,3]].perform_jump([3,5])
-# new_board[[4,6]].perform_jump([2,4])
-# new_board[[2,4]].king = true
-# new_board[[2,4]].perform_slide([4,5])
-#new_board[[2,4]].perform_jump([1,3])
+# new_board[[3,5]].perform_moves("2,4")
+# new_board[[4,6]].perform_moves("3,5")
+# new_board[[3,5]].perform_moves("4,4")
+# new_board[[5,7]].perform_moves("4,6")
+# new_board[[1,3]].perform_moves("3,5 5,7 4,6")
+
 
 new_board.render

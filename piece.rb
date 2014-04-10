@@ -91,12 +91,26 @@ class Piece
     end
   end
   
-  def perform_moves
-    
+  def perform_moves(move_sequence)
+    moves_array = parse_move_sequence(move_sequence)
+    if valid_move_seq?(moves_array)
+      perform_moves!(moves_array)
+    end
   end
   
-  def perform_moves!(move_sequence)
-    moves_array = parse_move_sequence(move_sequence)
+  def valid_move_seq?(moves_array)
+    new_board = @board.dup_board
+    new_piece = Piece.new(@position, new_board, @color, @king)
+    begin
+      new_piece.perform_moves!(moves_array)
+    rescue InvalidMoveError
+      puts "Invalid Sequence"
+      return false
+    end
+    true
+  end
+  
+  def perform_moves!(moves_array)
     
     moves_array.each_with_index do |move, idx|
       if (move.first - @position.first).abs > 1
@@ -120,6 +134,9 @@ class Piece
     moves
   end
   
+end
+
+class InvalidMoveError < RuntimeError
 end
 
 # x = Piece.new([5,5], nil, :black) # 4,6  6,6   - 3, 7  7,7
