@@ -23,7 +23,6 @@ class Piece
     moves = valid_slides.select do |slide_pos|
       board.valid_pos?(slide_pos) && board.is_empty?(slide_pos)
     end
-    moves
   end
   
   def find_valid_jumps
@@ -34,7 +33,8 @@ class Piece
     enemy_positions = [[i + 1, j + forward_dir], [i - 1, j + forward_dir]]
     
     if self.king
-      valid_slides += [i + 1, j - forward_dir*2] + [i - 1, j - forward_dir*2]
+      valid_jumps += [[i + 1, j - forward_dir*2]] + [[i - 1, j - forward_dir*2]]
+      enemy_positions += [[i + 1, j - forward_dir]] + [[i - 1, j - forward_dir]]
     end
     
     valid_jumps.each_with_index do |jump_pos, idx|
@@ -100,9 +100,8 @@ class Piece
   
   def valid_move_seq?(moves_array)
     new_board = @board.dup_board
-    new_piece = Piece.new(@position, new_board, @color, @king)
     begin
-      new_piece.perform_moves!(moves_array)
+      new_board[@position].perform_moves!(moves_array)
     rescue InvalidMoveError
       puts "Invalid Sequence"
       return false
@@ -111,7 +110,6 @@ class Piece
   end
   
   def perform_moves!(moves_array)
-    
     moves_array.each_with_index do |move, idx|
       if (move.first - @position.first).abs > 1
         perform_jump(move)
