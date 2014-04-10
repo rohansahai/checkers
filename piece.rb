@@ -50,7 +50,7 @@ class Piece
     if find_valid_slides.include?(pos)
       move_piece(pos)
     else
-      puts "Invalid Move" #change this to raising exception
+      raise InvalidMoveError
     end
   end
   
@@ -60,7 +60,7 @@ class Piece
       idx = valid_jumps.index(pos)
       move_piece(pos, enemy_pos[idx])
     else
-      puts "Invalid Move" #change this to raising exception
+      raise InvalidMoveError
     end
   end
   
@@ -89,6 +89,35 @@ class Piece
     if pos.last == king_row
       self.king = true
     end
+  end
+  
+  def perform_moves
+    
+  end
+  
+  def perform_moves!(move_sequence)
+    moves_array = parse_move_sequence(move_sequence)
+    
+    moves_array.each_with_index do |move, idx|
+      if (move.first - @position.first).abs > 1
+        perform_jump(move)
+      else
+        break if idx > 0
+        perform_slide(move)
+        break
+      end
+    end
+    
+  end
+  
+  def parse_move_sequence(move_sequence)
+    move_sequence = move_sequence.gsub(/\D/, '').split("")
+    moves = []
+    move_sequence.each_index do |idx|
+      next if idx.odd?
+      moves << [move_sequence[idx].to_i, move_sequence[idx + 1].to_i]
+    end
+    moves
   end
   
 end

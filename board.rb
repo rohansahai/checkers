@@ -73,22 +73,18 @@ class Board
 end
 
 new_board = Board.new
-new_board[[0,2]].perform_slide([1,3])
-new_board[[3,5]].perform_slide([2,4])
-new_board[[1,3]].perform_jump([3,5])
-new_board[[4,6]].perform_jump([2,4])
-new_board[[2,4]].king = true
-new_board[[2,4]].perform_slide([4,5])
+new_board[[0,2]].perform_moves("1,3")
+new_board[[3,5]].perform_moves("2,4")
+new_board[[4,6]].perform_moves("3,5")
+new_board[[3,5]].perform_moves("4,4")
+new_board[[5,7]].perform_moves("4,6")
+new_board[[1,3]].perform_moves("3,5 5,7 4,6")
+# new_board[[0,2]].perform_slide([1,3])
+# new_board[[3,5]].perform_slide([2,4])
+# new_board[[1,3]].perform_jump([3,5])
+# new_board[[4,6]].perform_jump([2,4])
+# new_board[[2,4]].king = true
+# new_board[[2,4]].perform_slide([4,5])
 #new_board[[2,4]].perform_jump([1,3])
 
 new_board.render
-
-# new_board.spaces.each do |spaces|
-#   spaces.each do |spot|
-#     if spot != nil
-#       p spot.position
-#     else
-#       p nil
-#     end
-#   end
-# end
