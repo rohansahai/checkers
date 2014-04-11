@@ -35,7 +35,7 @@ class Piece
     enemy_positions = [[i + 1, j + forward_dir], [i - 1, j + forward_dir]]
     
     if self.king
-      valid_jumps += [[i + 1, j - forward_dir*2]] + [[i - 1, j - forward_dir*2]]
+      valid_jumps += [[i + 2, j - forward_dir*2]] + [[i - 2, j - forward_dir*2]]
       enemy_positions += [[i + 1, j - forward_dir]] + [[i - 1, j - forward_dir]]
     end
     
