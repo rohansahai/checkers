@@ -65,20 +65,16 @@ class Piece
   end
   
   def is_enemy?(pos)
-    if !@board.is_empty?(pos) && @board[pos].color != self.color
-      return true
-    end
-    false
+    !@board.is_empty?(pos) && @board[pos].color != self.color
   end
   
-  #Delete when jump?
   def move_piece(pos, enemy_pos = nil)
     @board[position] = nil  #set old spot to empty
     @position[0] = pos.first  #update pieces location
     @position[1] = pos.last
     @board[pos] = self  #update board with new piece
     
-    if enemy_pos !=nil
+    if enemy_pos != nil
       @board[enemy_pos] = nil
     end
     maybe_promote(pos)
@@ -91,11 +87,9 @@ class Piece
     end
   end
   
-  def perform_moves(move_sequence)
-    moves_array = parse_move_sequence(move_sequence)
-    if valid_move_seq?(moves_array)
-      perform_moves!(moves_array)
-    end
+  def perform_moves(moves_array, current_player)
+    raise NachYoPeaceError if self.color != current_player
+    perform_moves!(moves_array) if valid_move_seq?(moves_array)
   end
   
   def valid_move_seq?(moves_array)
@@ -122,19 +116,22 @@ class Piece
     
   end
   
-  def parse_move_sequence(move_sequence)
-    move_sequence = move_sequence.gsub(/\D/, '').split("")
-    moves = []
-    move_sequence.each_index do |idx|
-      next if idx.odd?
-      moves << [move_sequence[idx].to_i, move_sequence[idx + 1].to_i]
-    end
-    moves
-  end
+  # def parse_move_sequence(move_sequence)
+  #   move_sequence = move_sequence.gsub(/\D/, '').split("")
+  #   moves = []
+  #   move_sequence.each_index do |idx|
+  #     next if idx.odd?
+  #     moves << [move_sequence[idx].to_i, move_sequence[idx + 1].to_i]
+  #   end
+  #   moves
+  # end
   
 end
 
 class InvalidMoveError < RuntimeError
+end
+
+class NachYoPeaceError < RuntimeError
 end
 
 # x = Piece.new([5,5], nil, :black) # 4,6  6,6   - 3, 7  7,7
