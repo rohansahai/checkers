@@ -1,13 +1,15 @@
 require "./piece.rb"
 require 'colorize'
 class Board
-  attr_accessor :spaces, :pieces
+  attr_accessor :spaces, :pieces, :cursor_pos
   
+  CURSOR = "$$".blink.blue.on_cyan
   OPP_COLOR = {:red => :black, :black => :red}
   
   def initialize(options = {})
     @spaces = Array.new(8) { Array.new(8) }
     populate_board unless options[:empty]
+    @cursor_pos = [0, 0]
   end
   
   def populate_board
@@ -79,11 +81,13 @@ class Board
     puts (0..7).to_a.join(" ")
     @spaces.each_with_index do |row, i|
       print "#{i} "
-      row.each do |col|
-        if col == nil
+      row.each_with_index do |col, j|
+        if @cursor_pos == [i,j]
+          print CURSOR
+        elsif col == nil
           print "_ ".yellow.colorize(:background => square_color)
         elsif col.king == true
-          print "K ".colorize(:background => square_color)
+          print "K ".yellow.colorize(:background => square_color)
         elsif col.color == :black
           print "B ".white.colorize(:background => square_color)
         elsif col.color == :red
@@ -96,16 +100,19 @@ class Board
     end
   end
   
+  def move_cursor(command_key)
+      new_location = @cursor_pos.dup
+      case command_key
+      when 'i'
+        new_location[0] -= 1
+      when 'j'
+        new_location[1] -= 1
+      when 'k'
+        new_location[0] += 1
+      when 'l'
+        new_location[1] += 1
+      end
+      @cursor_pos = new_location
+    end
+  
 end
-
-# new_board = Board.new
-# new_board[[0,2]].perform_moves("1,3")
-# new_board[[3,5]].perform_moves("2,4")
-# new_board[[4,6]].perform_moves("3,5")
-# new_board[[3,5]].perform_moves("4,4")
-# new_board[[5,7]].perform_moves("4,6")
-# #new_board[[1,3]].perform_moves("3,5 5,7 7,5")
-# new_board[[2,2]].perform_moves("0,4")
-# 
-# 
-# new_board.render

@@ -1,3 +1,5 @@
+require 'debugger'
+
 class Piece
   attr_accessor :position, :board, :color, :king
   
@@ -38,7 +40,7 @@ class Piece
     end
     
     valid_jumps.each_with_index do |jump_pos, idx|
-      if board.valid_pos?(jump_pos) && is_enemy?(enemy_positions[idx])
+      if board.valid_pos?(jump_pos) && is_enemy?(enemy_positions[idx]) && board.is_empty?(jump_pos)
         moves << jump_pos
         enemy_pos << enemy_positions[idx]
       end
@@ -77,7 +79,7 @@ class Piece
     if enemy_pos != nil
       @board[enemy_pos] = nil
     end
-    maybe_promote(pos)
+    #maybe_promote(pos)
   end
   
   def maybe_promote(pos)
@@ -90,6 +92,7 @@ class Piece
   def perform_moves(moves_array, current_player)
     raise NachYoPeaceError if self.color != current_player
     perform_moves!(moves_array) if valid_move_seq?(moves_array)
+    maybe_promote(self.position)
   end
   
   def valid_move_seq?(moves_array)
@@ -113,19 +116,7 @@ class Piece
         break
       end
     end
-    
   end
-  
-  # def parse_move_sequence(move_sequence)
-  #   move_sequence = move_sequence.gsub(/\D/, '').split("")
-  #   moves = []
-  #   move_sequence.each_index do |idx|
-  #     next if idx.odd?
-  #     moves << [move_sequence[idx].to_i, move_sequence[idx + 1].to_i]
-  #   end
-  #   moves
-  # end
-  
 end
 
 class InvalidMoveError < RuntimeError

@@ -1,7 +1,7 @@
 require "./board.rb"
 
 class Game
-  attr_accessor :board, :current_player
+  attr_accessor :board, :current_player, :moves
   
   TURN = {:red => :black, :black => :red} 
   NAV = { 'j' => [-1, 0], 'k' => [0, 1], 'l' => [1, 0], 'i' => [0, -1] } 
@@ -9,6 +9,8 @@ class Game
   def initialize
     @board = Board.new
     @current_player = :red
+    @move = {:coordinates => [0,0], :crunch => false}
+    @moves = []
   end
   
   def run
@@ -49,37 +51,98 @@ class Game
     moves
   end
   
-  def space_picker
-
-    loop do
-      @board.render
-      
+  def run_new
+    until @board.over?
       begin
-        system("stty raw -echo")
-        str = STDIN.getc
-      ensure
-        system("stty -raw echo")
-      end
-
-      system("clear")
-
-      case str
-      when ' '
-        return @board.cursor_pos
-      end
-      
-      if NAV.include?(str)
-        new_x = @board.cursor_pos[0] + NAV[str].first
-        new_y = @board.cursor_pos[1] + NAV[str].last
-        unless @board.off_board?([new_x, new_y])
-          @board.cursor_pos = [new_x, new_y]
+        system("clear")
+        @board.render
+        puts "#{@current_player}, do ya dayam turn!"
+        
+        if @move[:crunch] && moves.length > 1
+          do_the_move(moves)
+          reset_defaults
+          system("clear")
+          @board.render
         end
+        
+        get_move
+        
+        
+      rescue PickSpace
+        @moves << @board.cursor_pos
+      rescue EndSpace
+        @moves << @board.cursor_pos
+        @move[:crunch] = true
+      rescue InvalidMoveError
+        puts "You can't do that"
+        reset_defaults
+        retry
+      rescue NachYoPeaceError
+        puts "That's nach yo peaccce!"
+        reset_defaults
+        retry
       end
     end
+  end
+  
+  def do_the_move(moves)
     
+    start_pos = moves.shift
+    start_pos = [start_pos[1], start_pos[0]]
+    seq_moves = []
+    
+    @moves.each do |move|
+      seq_moves << [move[1], move[0]]
+    end
+    raise InvalidMoveError if @board[start_pos].nil?
+    @board[start_pos].perform_moves(seq_moves, @current_player)
+    @current_player = TURN[@current_player]
+  end
+  
+  def reset_defaults
+    @move[:crunch] = false
+    @moves = []
+  end
+  
+  def get_char
+    # Thanks to Jeff Fidler who thanked --> http://stackoverflow.com/questions/8142901/ruby-stdin-getc-does-not-read-char-on-reception
+    begin
+      system("stty raw -echo")
+      str = STDIN.getc
+    ensure
+      system("stty -raw echo")
+    end
+    str.chr
+  end
+  
+  def get_move
+    print "\nUse i,j,k,l to steer the cursor. Use z to pick the checker you would like to move."
+    print"\nUse the space bar to select a position to move your piece."
+    print"\nYou can use z to select multiple spaces, and then space to multi jump!"
+    print"\nIf you do something you are not allowed it is the next player's turn. Unforgivable!"
+    command = get_char
+    case command
+    when ' '
+      raise EndSpace
+    when 'z'
+      raise PickSpace
+    when 'q'
+
+    else
+      @board.move_cursor(command)
+      return nil
+    end
+
+    move[:coordinates] = @board.cursor_pos
   end
   
 end
 
+class PickSpace < RuntimeError
+end
+
+class EndSpace < RuntimeError
+end
+
 new_game = Game.new
-new_game.run
+new_game.run_new
